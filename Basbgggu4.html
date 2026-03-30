@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Student Portal</title> <link rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon-7.ico">
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: #000; }
+        iframe { width: 100%; height: 100%; border: none; }
+        #panic { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; }
+    </style>
+</head>
+<body>
+
+
+    <iframe id="xbox-frame" src="https://www.xbox.com/play"></iframe>
+
+
+    <div id="panic"><iframe src="https://classroom.google.com" style="width:100%; height:100%;"></div>
+
+
+    <script>
+        /* 1. THE VIRTUAL GAMEPAD ENGINE */
+        const vPad = { 
+            axes: [0, 0, 0, 0], 
+            buttons: new Array(17).fill(0).map(() => ({ pressed: false, value: 0 })) 
+        };
+
+
+        /* 2. PC-STYLE KEYBOARD MAPPING */
+        const keyMap = {
+            'KeyW': 12, 'KeyS': 13, 'KeyA': 14, 'KeyD': 15, // Movement (D-Pad)
+            'Space': 0,      // A Button (Sprint/Handbrake)
+            'ShiftLeft': 1,  // B Button (Crouch/Phone)
+            'KeyF': 3,       // Y Button (Enter Vehicle)
+            'KeyR': 2,       // X Button (Jump/Reload)
+            'Enter': 9,      // Start Menu
+            'Escape': 8,     // Back/View
+            'Digit1': 4,     // Left Bumper
+            'Digit2': 5      // Right Bumper
+        };
+
+
+        window.addEventListener("keydown", (e) => {
+            if (keyMap[e.code] !== undefined) {
+                vPad.buttons[keyMap[e.code]].pressed = true;
+                vPad.buttons[keyMap[e.code]].value = 1.0;
+            }
+            if (e.key === '~') { document.getElementById('panic').style.display = 'block'; }
+        });
+
+
+        window.addEventListener("keyup", (e) => {
+            if (keyMap[e.code] !== undefined) {
+                vPad.buttons[keyMap[e.code]].pressed = false;
+                vPad.buttons[keyMap[e.code]].value = 0;
+            }
+        });
+
+
+        // This is the core "Hack" that makes Xbox think a controller is plugged in
+        navigator.getGamepads = () => [vPad];
+
+
+        /* 3. MOUSE-TO-JOYSTICK (EXPERIMENTAL) */
+        // This attempts to map your mouse movement to the right analog stick for aiming
+        window.addEventListener('mousemove', (e) => {
+            const movementX = e.movementX || 0;
+            const movementY = e.movementY || 0;
+            vPad.axes[2] = Math.max(-1, Math.min(1, movementX / 10)); // Right Stick X
+            vPad.axes[3] = Math.max(-1, Math.min(1, movementY / 10)); // Right Stick Y
+        });
+    </script>
+</body>
+</html>
